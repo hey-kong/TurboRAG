@@ -17,22 +17,24 @@ from transformers.models.qwen2.modeling_qwen2 import (
 from transformers.models.qwen2.modeling_qwen2 import Qwen2RotaryEmbedding  # Import the rotary embedding class
 from typing import Optional, Tuple, Union
 
+
 def apply_single_rotary_pos_emb(inputs, cos, sin, position_ids, unsqueeze_dim=1):
     cos = cos[position_ids].unsqueeze(unsqueeze_dim)
     sin = sin[position_ids].unsqueeze(unsqueeze_dim)
     embed = (inputs * cos) + (rotate_half(inputs) * sin)
     return embed
 
+
 class Qwen2ModifiedAttention(Qwen2Attention):
     def forward(
-        self,
-        hidden_states: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.LongTensor] = None,
-        past_key_value: Optional[Cache] = None,
-        output_attentions: bool = False,
-        use_cache: bool = False,
-        **kwargs,
+            self,
+            hidden_states: torch.Tensor,
+            attention_mask: Optional[torch.Tensor] = None,
+            position_ids: Optional[torch.LongTensor] = None,
+            past_key_value: Optional[Cache] = None,
+            output_attentions: bool = False,
+            use_cache: bool = False,
+            **kwargs,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
         if "padding_mask" in kwargs:
             warnings.warn(
@@ -69,8 +71,8 @@ class Qwen2ModifiedAttention(Qwen2Attention):
 
             # Prepare full_position_ids for the keys (from the cache)
             full_position_ids = torch.arange(
-                    0, past_key_value.seen_tokens, dtype=torch.long, device=query_states.device
-                )
+                0, past_key_value.seen_tokens, dtype=torch.long, device=query_states.device
+            )
             full_position_ids = full_position_ids.unsqueeze(0)
         else:
             full_position_ids = position_ids
@@ -119,10 +121,12 @@ class Qwen2ModifiedAttention(Qwen2Attention):
 
         return attn_output, attn_weights, past_key_value
 
+
 class Qwen2ModifiedDecoderLayer(Qwen2DecoderLayer):
     def __init__(self, config: Qwen2Config, layer_idx: int):
         super().__init__(config, layer_idx)
         self.self_attn = Qwen2ModifiedAttention(config, layer_idx)
+
 
 class Qwen2ModifiedModel(Qwen2Model):
     def __init__(self, config: Qwen2Config):
@@ -130,6 +134,7 @@ class Qwen2ModifiedModel(Qwen2Model):
         self.layers = nn.ModuleList(
             [Qwen2ModifiedDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]
         )
+
 
 class Qwen2ModifiedForCausalLM(Qwen2ForCausalLM):
     def __init__(self, config: Qwen2Config):
