@@ -1,9 +1,9 @@
+import os
 import torch
-from transformers import AutoTokenizer
-from qwen2 import Qwen2ModifiedForCausalLM
 from typing import List, Optional
 from tqdm import tqdm
-import os
+from transformers import AutoTokenizer
+from qwen2 import Qwen2ModifiedForCausalLM
 
 # LlamaIndex related
 from llama_index.core import (
@@ -24,7 +24,7 @@ from llama_index.core.vector_stores import SimpleVectorStore
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-model_name = "../Qwen2-7B-Instruct"
+model_name = "../Qwen2.5-3B-Instruct"
 model = Qwen2ModifiedForCausalLM.from_pretrained(
     model_name,
     torch_dtype="auto",
@@ -44,7 +44,6 @@ if not os.path.exists(output_path):
 
 
 def process_chunk(chunk_text, chunk_id):
-    chunk_text = "<|doc_start|>" + chunk_text + "<|doc_end|>"
     inputs = tokenizer(chunk_text, return_tensors="pt").to(model.device)
 
     with torch.no_grad():
